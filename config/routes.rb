@@ -18,4 +18,6 @@ Rails.application.routes.draw do
       post :clear_cache
     end
   end
+
+  root 'data#index'
 end
