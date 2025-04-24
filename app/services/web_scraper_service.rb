@@ -33,7 +33,11 @@ class WebScraperService
       fields.each do |field_name, selector|
         # Add random delay before each field extraction
         random_delay
+        if field_name == 'meta'
+          result[field_name] = extract_meta_tags(session, selector)
+        else
         result[field_name] = extract_content(session, selector)
+        end
       end
 
       # Only include screenshot path if it was successfully created
@@ -125,5 +129,26 @@ class WebScraperService
     rescue Capybara::ElementNotFound
       nil
     end
+  end
+
+  def extract_meta_tags(session, meta_names)
+    result = {}
+    meta_names.each do |meta_name|
+      # Try to find meta tag by name attribute
+      meta_tag = session.find("meta[name='#{meta_name}']", match: :first, wait: 5, visible: false) rescue nil
+
+      # If not found by name, try property attribute (for Open Graph and Twitter cards)
+      if meta_tag.nil?
+        meta_tag = session.find("meta[property='#{meta_name}']", match: :first, wait: 5, visible: false) rescue nil
+      end
+
+      # If still not found, try content attribute
+      if meta_tag.nil?
+        meta_tag = session.find("meta[content*='#{meta_name}']", match: :first, wait: 5, visible: false) rescue nil
+      end
+
+      result[meta_name] = meta_tag ? meta_tag['content'] : nil
+    end
+    result
   end
 end

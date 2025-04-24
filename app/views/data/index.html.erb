@@ -19,46 +19,100 @@
               <div id="fieldsContainer" data-scraper-target="fieldsContainer" role="group" aria-label="Fields to extract">
                 <div class="field-row mb-2">
                   <div class="row">
+                    <div class="col-md-12 mb-4">
+                      <select class="form-select" name="fields[][type]" aria-label="Field type">
+                        <option value="selector" selected>CSS Selector</option>
+                        <option value="meta">Meta Tag</option>
+                      </select>
+                    </div>
                     <div class="col-md-5">
                       <input type="text" class="form-control" placeholder="Field Name"
                              name="fields[][name]" value="price" aria-label="Field name">
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-5 selector-input">
                       <input type="text" class="form-control" placeholder="CSS Selector"
                              name="fields[][selector]" value=".price-box--normal" aria-label="CSS selector">
                     </div>
-                    <div class="col-md-1">
-                      <button type="button" class="btn btn-danger" data-action="click->scraper#removeField" aria-label="Remove field">×</button>
+                    <div class="col-md-6 meta-input" style="display: none;">
+                      <div class="meta-tags-container">
+                        <div class="meta-tag-row mb-2">
+                          <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Meta Tag Name"
+                                   name="fields[][meta_names][]" value="keywords" aria-label="Meta tag name">
+                            <button type="button" class="btn btn-outline-danger" data-action="click->scraper#removeMetaTag">×</button>
+                          </div>
+                        </div>
+                      </div>
+                      <button type="button" class="btn btn-sm btn-outline-secondary mt-2" data-action="click->scraper#addMetaTag">Add Meta Tag</button>
+                    </div>
+                    <div class="col-md-2 ml-auto">
+                      <button type="button" class="btn btn-danger w-100 text-center" data-action="click->scraper#removeField" aria-label="Remove field">×</button>
                     </div>
                   </div>
                 </div>
                 <div class="field-row mb-2">
                   <div class="row">
+                    <div class="col-md-12 mb-4">
+                      <select class="form-select" name="fields[][type]" aria-label="Field type">
+                        <option value="selector" selected>CSS Selector</option>
+                        <option value="meta">Meta Tag</option>
+                      </select>
+                    </div>
                     <div class="col-md-5">
                       <input type="text" class="form-control" placeholder="Field Name"
                              name="fields[][name]" value="rating_count" aria-label="Field name">
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-5 selector-input">
                       <input type="text" class="form-control" placeholder="CSS Selector"
                              name="fields[][selector]" value=".ratingCount" aria-label="CSS selector">
                     </div>
-                    <div class="col-md-1">
-                      <button type="button" class="btn btn-danger" data-action="click->scraper#removeField" aria-label="Remove field">×</button>
+                    <div class="col-md-6 meta-input" style="display: none;">
+                      <div class="meta-tags-container">
+                        <div class="meta-tag-row mb-2">
+                          <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Meta Tag Name"
+                                   name="fields[][meta_names][]" value="keywords" aria-label="Meta tag name">
+                            <button type="button" class="btn btn-outline-danger" data-action="click->scraper#removeMetaTag">×</button>
+                          </div>
+                        </div>
+                      </div>
+                      <button type="button" class="btn btn-sm btn-outline-secondary mt-2" data-action="click->scraper#addMetaTag">Add Meta Tag</button>
+                    </div>
+                    <div class="col-md-2 ml-auto">
+                      <button type="button" class="btn btn-danger w-100 text-center" data-action="click->scraper#removeField" aria-label="Remove field">×</button>
                     </div>
                   </div>
                 </div>
                 <div class="field-row mb-2">
                   <div class="row">
+                    <div class="col-md-12 mb-4">
+                      <select class="form-select" name="fields[][type]" aria-label="Field type">
+                        <option value="selector" selected>CSS Selector</option>
+                        <option value="meta">Meta Tag</option>
+                      </select>
+                    </div>
                     <div class="col-md-5">
                       <input type="text" class="form-control" placeholder="Field Name"
                              name="fields[][name]" value="rating_value" aria-label="Field name">
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-5 selector-input">
                       <input type="text" class="form-control" placeholder="CSS Selector"
                              name="fields[][selector]" value=".ratingValue" aria-label="CSS selector">
                     </div>
-                    <div class="col-md-1">
-                      <button type="button" class="btn btn-danger" data-action="click->scraper#removeField" aria-label="Remove field">×</button>
+                    <div class="col-md-6 meta-input" style="display: none;">
+                      <div class="meta-tags-container">
+                        <div class="meta-tag-row mb-2">
+                          <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Meta Tag Name"
+                                   name="fields[][meta_names][]" value="keywords" aria-label="Meta tag name">
+                            <button type="button" class="btn btn-outline-danger" data-action="click->scraper#removeMetaTag">×</button>
+                          </div>
+                        </div>
+                      </div>
+                      <button type="button" class="btn btn-sm btn-outline-secondary mt-2" data-action="click->scraper#addMetaTag">Add Meta Tag</button>
+                    </div>
+                    <div class="col-md-2 ml-auto">
+                      <button type="button" class="btn btn-danger w-100 text-center" data-action="click->scraper#removeField" aria-label="Remove field">×</button>
                     </div>
                   </div>
                 </div>
@@ -66,7 +120,7 @@
               <button type="button" class="btn btn-secondary mt-2" data-action="click->scraper#addField">Add Field</button>
             </div>
 
-            <button type="submit" class="btn btn-primary">Scrape Data</button>
+            <button id="scrapeButton" type="submit" class="btn btn-primary">Scrape Data</button>
           </form>
 
           <section id="result" data-scraper-target="result" class="mt-4" style="display: none;" aria-live="polite">
