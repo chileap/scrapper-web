@@ -3,7 +3,7 @@ require 'capybara'
 require 'fileutils'
 require 'digest'
 
-class WebScraperService
+module WebScraperConfig
   USER_AGENTS = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
@@ -12,73 +12,98 @@ class WebScraperService
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 Edg/91.0.864.59'
   ].freeze
 
+  CHROME_OPTIONS = {
+    headless: '--headless=new',
+    disable_gpu: '--disable-gpu',
+    no_sandbox: '--no-sandbox',
+    disable_dev_shm: '--disable-dev-shm-usage',
+    window_size: '--window-size=1920,1080'
+  }.freeze
+
+  TIMEOUTS = {
+    page_load: 30,
+    element_wait: 10,
+    meta_wait: 5
+  }.freeze
+
+  DELAY_RANGE = (3..10).freeze
+end
+
+class WebScraperService
+  include WebScraperConfig
+
+  # Initializes a new WebScraperService instance
+  # Sets up Capybara and creates the screenshots directory
   def initialize
     setup_capybara
     setup_screenshots_directory
   end
 
+  # Scrapes content from a given URL based on specified fields
+  # @param url [String] The URL to scrape
+  # @param fields [Hash] A hash of field names and their corresponding selectors
+  # @return [Hash] A hash containing the scraped data and screenshot path
   def scrape(url, fields)
-    session = Capybara::Session.new(:selenium_chrome_headless)
+    session = create_session
+    result = {}
 
     begin
-      # Add random delay before visiting the URL
-      random_delay
-      session.visit(url)
-      wait_for_page_load(session)
-
-      # Take screenshot before extracting content
-      screenshot_path = take_screenshot(session, url)
-
-      result = {}
-      fields.each do |field_name, selector|
-        # Add random delay before each field extraction
-        random_delay
-        if field_name == 'meta'
-          result[field_name] = extract_meta_tags(session, selector)
-        else
-        result[field_name] = extract_content(session, selector)
-        end
-      end
-
-      # Only include screenshot path if it was successfully created
-      if screenshot_path && File.exist?(Rails.root.join('public', screenshot_path))
-        result[:screenshot] = screenshot_path
-      end
-
-      result
+      navigate_to_url(session, url)
+      result[:screenshot] = capture_screenshot(session, url)
+      result.merge!(extract_fields(session, fields))
     ensure
-      session.driver.quit
+      cleanup_session(session)
     end
+
+    result
   end
 
   private
 
+  def create_session
+    Capybara::Session.new(:selenium_chrome_headless)
+  end
+
+  def cleanup_session(session)
+    session.driver.quit
+  end
+
+  def navigate_to_url(session, url)
+    random_delay
+    session.visit(url)
+    wait_for_page_load(session)
+  end
+
+  def extract_fields(session, fields)
+    fields.each_with_object({}) do |(field_name, selector), result|
+      random_delay
+      result[field_name] = field_name == 'meta' ?
+        extract_meta_tags(session, selector) :
+        extract_content(session, selector)
+    end
+  end
+
   def random_delay
-    # Generate a random delay between 3 and 10 seconds
-    delay = rand(3..10)
+    delay = rand(DELAY_RANGE)
     Rails.logger.info "Waiting for #{delay} seconds..."
     sleep(delay)
   end
 
   def setup_capybara
     Capybara.register_driver :selenium_chrome_headless do |app|
-      options = Selenium::WebDriver::Chrome::Options.new
-      options.add_argument('--headless=new')
-      options.add_argument('--disable-gpu')
-      options.add_argument('--no-sandbox')
-      options.add_argument('--disable-dev-shm-usage')
-      options.add_argument('--window-size=1920,1080')
-      options.add_argument("--user-agent=#{USER_AGENTS.sample}")
-
-      Capybara::Selenium::Driver.new(
-        app,
-        browser: :chrome,
-        options: options
-      )
+      options = configure_chrome_options
+      Capybara::Selenium::Driver.new(app, browser: :chrome, options: options)
     end
 
     Capybara.javascript_driver = :selenium_chrome_headless
     Capybara.default_driver = :selenium_chrome_headless
+  end
+
+  def configure_chrome_options
+    options = Selenium::WebDriver::Chrome::Options.new
+    CHROME_OPTIONS.each { |_, arg| options.add_argument(arg) }
+    options.add_argument("--user-agent=#{USER_AGENTS.sample}")
+    options
   end
 
   def setup_screenshots_directory
@@ -86,31 +111,27 @@ class WebScraperService
     FileUtils.mkdir_p(@screenshots_dir)
   end
 
-  def take_screenshot(session, url)
+  def capture_screenshot(session, url)
+    filename = generate_screenshot_filename(url)
+    screenshot_path = @screenshots_dir.join(filename)
+
     begin
-      # Generate a unique filename based on the URL and timestamp
-      filename = "#{Digest::MD5.hexdigest(url)}_#{Time.now.to_i}.png"
-      screenshot_path = @screenshots_dir.join(filename)
-
-      # Take the screenshot
       session.save_screenshot(screenshot_path)
-
-      # Verify the screenshot was created
-      if File.exist?(screenshot_path)
-        # Return the relative path for the response
-        "/screenshots/#{filename}"
-      else
-        Rails.logger.error "Failed to create screenshot at #{screenshot_path}"
-        nil
-      end
+      return "/screenshots/#{filename}" if File.exist?(screenshot_path)
+      Rails.logger.error "Failed to create screenshot at #{screenshot_path}"
     rescue => e
       Rails.logger.error "Error taking screenshot: #{e.message}"
-      nil
     end
+
+    nil
+  end
+
+  def generate_screenshot_filename(url)
+    "#{Digest::MD5.hexdigest(url)}_#{Time.now.to_i}.png"
   end
 
   def wait_for_page_load(session)
-    Timeout.timeout(30) do
+    Timeout.timeout(TIMEOUTS[:page_load]) do
       loop until session.evaluate_script('document.readyState') == 'complete'
     end
   rescue Timeout::Error
@@ -118,37 +139,46 @@ class WebScraperService
   end
 
   def extract_content(session, selector)
-    # First try to find a single element
     begin
-      element = session.find(selector, match: :first, wait: 10)
-      return element.text.strip
+      element = session.find(selector, match: :first, wait: TIMEOUTS[:element_wait])
+      element.text.strip
     rescue Capybara::Ambiguous
-      # If multiple elements found, get all of them and join their text
-      elements = session.all(selector, wait: 10)
-      return elements.map(&:text).map(&:strip).join(' ')
+      handle_multiple_elements(session, selector)
     rescue Capybara::ElementNotFound
       nil
     end
   end
 
+  def handle_multiple_elements(session, selector)
+    elements = session.all(selector, wait: TIMEOUTS[:element_wait])
+    elements.map(&:text).map(&:strip).join(' ')
+  end
+
   def extract_meta_tags(session, meta_names)
-    result = {}
-    meta_names.each do |meta_name|
-      # Try to find meta tag by name attribute
-      meta_tag = session.find("meta[name='#{meta_name}']", match: :first, wait: 5, visible: false) rescue nil
-
-      # If not found by name, try property attribute (for Open Graph and Twitter cards)
-      if meta_tag.nil?
-        meta_tag = session.find("meta[property='#{meta_name}']", match: :first, wait: 5, visible: false) rescue nil
-      end
-
-      # If still not found, try content attribute
-      if meta_tag.nil?
-        meta_tag = session.find("meta[content*='#{meta_name}']", match: :first, wait: 5, visible: false) rescue nil
-      end
-
-      result[meta_name] = meta_tag ? meta_tag['content'] : nil
+    meta_names.each_with_object({}) do |meta_name, result|
+      result[meta_name] = find_meta_tag_content(session, meta_name)
     end
-    result
+  end
+
+  def find_meta_tag_content(session, meta_name)
+    meta_tag = find_meta_tag_by_attribute(session, meta_name, 'name') ||
+               find_meta_tag_by_attribute(session, meta_name, 'property') ||
+               find_meta_tag_by_content(session, meta_name)
+
+    meta_tag&.[]('content')
+  end
+
+  def find_meta_tag_by_attribute(session, meta_name, attribute)
+    session.find("meta[#{attribute}='#{meta_name}']",
+                match: :first,
+                wait: TIMEOUTS[:meta_wait],
+                visible: false) rescue nil
+  end
+
+  def find_meta_tag_by_content(session, meta_name)
+    session.find("meta[content*='#{meta_name}']",
+                match: :first,
+                wait: TIMEOUTS[:meta_wait],
+                visible: false) rescue nil
   end
 end
