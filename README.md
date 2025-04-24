@@ -7,7 +7,6 @@ This is a Ruby on Rails application designed for testing web scraping functional
 * Ruby 3.2.2
 * PostgreSQL
 * Redis
-* Docker (optional)
 * Node.js (for asset compilation)
 
 ## Technology Stack
@@ -31,8 +30,8 @@ This is a Ruby on Rails application designed for testing web scraping functional
 
 1. Clone the repository:
    ```bash
-   git clone [repository-url]
-   cd scrapping-data-testing
+   git clone https://github.com/chileap/scrapper-web.git
+   cd scrapper-web
    ```
 
 2. Install Ruby dependencies:
@@ -45,7 +44,7 @@ This is a Ruby on Rails application designed for testing web scraping functional
    bin/importmap pin
    ```
 
-4. Environment setup:
+4. Environment setup (optional):
    ```bash
    cp .env.example .env
    # Edit .env with your configuration
@@ -69,18 +68,6 @@ This is a Ruby on Rails application designed for testing web scraping functional
 7. Start the Rails server:
    ```bash
    rails server
-   ```
-
-### Docker Setup
-
-1. Build the Docker image:
-   ```bash
-   docker build -t scraping-app .
-   ```
-
-2. Run the application:
-   ```bash
-   docker-compose up
    ```
 
 ## Development
@@ -138,18 +125,6 @@ config.cache_store = :redis_cache_store, {
 }
 ```
 
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
 ## Web Interface
 
 The application provides a user-friendly web interface for scraping data:
@@ -174,5 +149,3 @@ The application provides a user-friendly web interface for scraping data:
 - Price: `.price-box--normal`
 - Rating Count: `.ratingCount`
 - Rating Value: `.ratingValue`
-
-## API Examples
