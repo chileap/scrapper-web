@@ -36,7 +36,7 @@ export default class extends Controller {
     fieldRow.className = 'field-row mb-2'
     fieldRow.innerHTML = `
       <div class="row">
-        <div class="col-md-5">
+        <div class="col-md-12 mb-4">
           <select class="form-select" name="fields[][type]" aria-label="Field type">
             <option value="selector" selected>CSS Selector</option>
             <option value="meta">Meta Tag</option>
@@ -50,7 +50,7 @@ export default class extends Controller {
           <input type="text" class="form-control" placeholder="CSS Selector"
                  name="fields[][selector]" aria-label="CSS selector">
         </div>
-        <div class="col-md-6 meta-input" style="display: none;">
+        <div class="col-md-5 meta-input" style="display: none;">
           <div class="meta-tags-container">
             <div class="meta-tag-row mb-2">
               <div class="input-group">
