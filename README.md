@@ -35,24 +35,11 @@ This is a Ruby on Rails application designed for testing web scraping functional
 3. Database setup:
    ```bash
    rails db:create
-   rails db:migrate
    ```
 
 4. Start the Rails server:
    ```bash
    rails server
-   ```
-
-### Docker Setup
-
-1. Build the Docker image:
-   ```bash
-   docker build -t scraping-app .
-   ```
-
-2. Run the container:
-   ```bash
-   docker compose up
    ```
 
 ## Development

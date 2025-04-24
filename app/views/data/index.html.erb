@@ -1,0 +1,94 @@
+<main class="container mt-5" data-controller="scraper">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <article class="card">
+        <header class="card-header">
+          <h1 class="text-center h2">Web Scraper</h1>
+        </header>
+        <div class="card-body">
+          <form id="scraperForm" data-scraper-target="form" data-action="submit->scraper#submit" aria-label="Web scraper form">
+            <div class="mb-3">
+              <label for="url" class="form-label">URL to Scrape</label>
+              <input type="url" class="form-control" id="url" name="url" required
+                     value="https://www.alza.cz/aeg-7000-prosteam-lfr73964cc-d7635493.htm"
+                     aria-required="true">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Fields to Extract</label>
+              <div id="fieldsContainer" data-scraper-target="fieldsContainer" role="group" aria-label="Fields to extract">
+                <div class="field-row mb-2">
+                  <div class="row">
+                    <div class="col-md-5">
+                      <input type="text" class="form-control" placeholder="Field Name"
+                             name="fields[][name]" value="price" aria-label="Field name">
+                    </div>
+                    <div class="col-md-6">
+                      <input type="text" class="form-control" placeholder="CSS Selector"
+                             name="fields[][selector]" value=".price-box--normal" aria-label="CSS selector">
+                    </div>
+                    <div class="col-md-1">
+                      <button type="button" class="btn btn-danger" data-action="click->scraper#removeField" aria-label="Remove field">×</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="field-row mb-2">
+                  <div class="row">
+                    <div class="col-md-5">
+                      <input type="text" class="form-control" placeholder="Field Name"
+                             name="fields[][name]" value="rating_count" aria-label="Field name">
+                    </div>
+                    <div class="col-md-6">
+                      <input type="text" class="form-control" placeholder="CSS Selector"
+                             name="fields[][selector]" value=".ratingCount" aria-label="CSS selector">
+                    </div>
+                    <div class="col-md-1">
+                      <button type="button" class="btn btn-danger" data-action="click->scraper#removeField" aria-label="Remove field">×</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="field-row mb-2">
+                  <div class="row">
+                    <div class="col-md-5">
+                      <input type="text" class="form-control" placeholder="Field Name"
+                             name="fields[][name]" value="rating_value" aria-label="Field name">
+                    </div>
+                    <div class="col-md-6">
+                      <input type="text" class="form-control" placeholder="CSS Selector"
+                             name="fields[][selector]" value=".ratingValue" aria-label="CSS selector">
+                    </div>
+                    <div class="col-md-1">
+                      <button type="button" class="btn btn-danger" data-action="click->scraper#removeField" aria-label="Remove field">×</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="btn btn-secondary mt-2" data-action="click->scraper#addField">Add Field</button>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Scrape Data</button>
+          </form>
+
+          <section id="result" data-scraper-target="result" class="mt-4" style="display: none;" aria-live="polite">
+            <h2 class="h3">Results</h2>
+            <pre id="resultContent" data-scraper-target="resultContent" class="bg-light p-3 rounded"></pre>
+            <div id="screenshotContainer" data-scraper-target="screenshotContainer" class="mt-3" style="display: none;">
+              <h3 class="h4">Screenshot</h3>
+              <div class="text-center">
+                <img id="screenshot" data-scraper-target="screenshot" class="img-fluid rounded shadow"
+                     style="max-width: 100%; max-height: 600px; object-fit: contain;"
+                     alt="Scraped page screenshot">
+              </div>
+              <div class="text-center mt-2">
+                <a id="screenshotLink" data-scraper-target="screenshotLink" href="#" target="_blank"
+                   class="btn btn-sm btn-outline-primary" rel="noopener noreferrer">
+                  Open in new tab
+                </a>
+              </div>
+            </div>
+          </section>
+        </div>
+      </article>
+    </div>
+  </div>
+</main>
