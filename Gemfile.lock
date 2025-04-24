@@ -149,6 +149,10 @@ GEM
       actionview (>= 5.0.0)
       activesupport (>= 5.0.0)
     json (2.11.0)
+    kredis (1.8.0)
+      activemodel (>= 6.0.0)
+      activesupport (>= 6.0.0)
+      redis (>= 4.2, < 6)
     logger (1.7.0)
     loofah (2.24.0)
       crass (~> 1.0.2)
@@ -247,6 +251,10 @@ GEM
     rake (13.2.1)
     rdoc (6.13.1)
       psych (>= 4.0.0)
+    redis (5.4.0)
+      redis-client (>= 0.22.0)
+    redis-client (0.24.0)
+      connection_pool
     regexp_parser (2.9.2)
     reline (0.6.1)
       io-console (~> 0.5)
@@ -333,11 +341,13 @@ DEPENDENCIES
   faraday-follow_redirects
   importmap-rails
   jbuilder
+  kredis
   nokogiri
   pg (~> 1.1)
   pry
   puma (>= 5.0)
   rails (~> 7.1.5, >= 7.1.5.1)
+  redis (>= 4.0.1)
   rspec-rails
   selenium-webdriver
   sprockets-rails

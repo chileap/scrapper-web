@@ -37,6 +37,7 @@ class WebScraperService
   def initialize
     setup_capybara
     setup_screenshots_directory
+    @cache_service = WebScraperCacheService.new
   end
 
   # Scrapes content from a given URL based on specified fields
@@ -44,18 +45,65 @@ class WebScraperService
   # @param fields [Hash] A hash of field names and their corresponding selectors
   # @return [Hash] A hash containing the scraped data and screenshot path
   def scrape(url, fields)
+    # Try to get cached result first
+    cached_result = @cache_service.get_cached_result(url)
+    if cached_result
+      Rails.logger.info "Using cached content for URL: #{url}"
+      # Create a new session and load the cached HTML
+      session = create_session
+      begin
+        # Properly escape the HTML content
+        escaped_html = cached_result['html'].gsub(/'/, "\\\\'").gsub(/\n/, '\\n')
+
+        # Use a more reliable method to set the HTML content
+        session.driver.browser.execute_script(<<~JS)
+          document.open();
+          document.write('#{escaped_html}');
+          document.close();
+        JS
+
+        wait_for_page_load(session)
+
+        # Extract requested fields from cached content
+        result = extract_fields(session, fields, from_cache: true)
+        result[:screenshot] = cached_result['screenshot'] if cached_result['screenshot']
+        return result
+      rescue => e
+        Rails.logger.error "Error loading cached content: #{e.message}"
+        # If there's an error loading cached content, fall back to scraping
+      ensure
+        cleanup_session(session)
+      end
+    end
+
+    Rails.logger.info "Scraping fresh content for URL: #{url}"
+    # If not in cache or error loading cache, scrape the page
     session = create_session
     result = {}
 
     begin
       navigate_to_url(session, url)
+
+      # Extract all fields from the page
+      scraped_data = extract_fields(session, fields)
+
+      # Add screenshot to result
       result[:screenshot] = capture_screenshot(session, url)
-      result.merge!(extract_fields(session, fields))
+
+      # Merge scraped data with result
+      result.merge!(scraped_data)
+
+      # Cache the complete result
+      @cache_service.cache_result(url, session)
     ensure
       cleanup_session(session)
     end
 
     result
+  end
+
+  def clear_cache(url = nil)
+    @cache_service.clear_cache(url)
   end
 
   private
@@ -74,9 +122,9 @@ class WebScraperService
     wait_for_page_load(session)
   end
 
-  def extract_fields(session, fields)
+  def extract_fields(session, fields, from_cache: false)
     fields.each_with_object({}) do |(field_name, selector), result|
-      random_delay
+      random_delay unless from_cache
       result[field_name] = field_name == 'meta' ?
         extract_meta_tags(session, selector) :
         extract_content(session, selector)

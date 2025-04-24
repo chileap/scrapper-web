@@ -11,4 +11,11 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
+
+  resources :web_scraper, only: [] do
+    collection do
+      get :scrape
+      post :clear_cache
+    end
+  end
 end

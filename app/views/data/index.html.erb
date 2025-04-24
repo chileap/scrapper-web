@@ -120,7 +120,15 @@
               <button type="button" class="btn btn-secondary mt-2" data-action="click->scraper#addField">Add Field</button>
             </div>
 
-            <button id="scrapeButton" type="submit" class="btn btn-primary">Scrape Data</button>
+            <div class="d-flex gap-2">
+              <button id="scrapeButton" type="submit" class="btn btn-primary">Scrape Data</button>
+              <button type="button"
+                      class="btn btn-outline-danger"
+                      data-action="click->scraper#clearCache"
+                      data-confirm="Are you sure you want to clear the cache for this URL?">
+                <i class="fas fa-trash"></i> Clear Cache
+              </button>
+            </div>
           </form>
 
           <section id="result" data-scraper-target="result" class="mt-4" style="display: none;" aria-live="polite">

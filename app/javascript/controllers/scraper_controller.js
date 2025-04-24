@@ -36,7 +36,7 @@ export default class extends Controller {
     fieldRow.className = 'field-row mb-2'
     fieldRow.innerHTML = `
       <div class="row">
-        <div class="col-md-12 mb-4">
+        <div class="col-md-5">
           <select class="form-select" name="fields[][type]" aria-label="Field type">
             <option value="selector" selected>CSS Selector</option>
             <option value="meta">Meta Tag</option>
@@ -50,7 +50,7 @@ export default class extends Controller {
           <input type="text" class="form-control" placeholder="CSS Selector"
                  name="fields[][selector]" aria-label="CSS selector">
         </div>
-        <div class="col-md-5 meta-input" style="display: none;">
+        <div class="col-md-6 meta-input" style="display: none;">
           <div class="meta-tags-container">
             <div class="meta-tag-row mb-2">
               <div class="input-group">
@@ -162,5 +162,41 @@ export default class extends Controller {
       submitButton.disabled = false
       submitButton.textContent = originalButtonText
     }
+  }
+
+  async clearCache(event) {
+    event.preventDefault()
+
+    const url = this.formTarget.querySelector('#url').value
+
+    if (!confirm('Are you sure you want to clear the cache for this URL?')) {
+      return
+    }
+
+    const response = await fetch('/web_scraper/clear_cache', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+      },
+      body: JSON.stringify({ url })
+    })
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    const data = await response.json();
+    if (data.status === 'success') {
+      this.showNotification('Cache cleared successfully', 'success')
+    } else {
+      this.showNotification('Failed to clear cache', 'error')
+    }
+  }
+
+  showNotification(message, type = 'info') {
+    // You can implement a toast notification system here
+    alert(message) // TODO: Implement a toast notification system
   }
 }

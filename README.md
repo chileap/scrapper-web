@@ -66,3 +66,18 @@ rails test
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Caching
+
+The web scraper implements caching to optimize repeated requests to the same URL. Here's how it works:
+
+1. **Cache Duration**: Results are cached for 1 hour by default
+2. **Cache Keys**: Cache keys are generated based on the URL and requested fields
+3. **Cache Management**:
+   - Results are automatically cached after successful scraping
+   - Cache can be cleared for specific URLs or entirely
+   - Cache is automatically used for subsequent requests to the same URL with the same fields
+
+### Cache Configuration
+
+The caching system uses Redis for storage. Make sure Redis is running and configured in your environment.
